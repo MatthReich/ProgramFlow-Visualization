@@ -17,7 +17,7 @@ async function main() {
 		const [cliPath, ...args] = resolveCliArgsFromVSCodeExecutablePath(vscodeExecutablePath);
 		cp.spawnSync(
 			cliPath,
-			[...args, '--install-extension', 'vscjava.vscode-java-debug', 'redhat.java', 'ms-python.python'],
+			[...args, '--install-extension', 'vscjava.vscode-java-debug', 'redhat.java', 'ms-python.python', 'ms-toolsai.jupyter'],
 			{
 				encoding: 'utf-8',
 				stdio: 'inherit'

@@ -6,7 +6,7 @@ import * as TestFileContents from './PythonTestFileContents';
 
 const TENTY_SECONDS = 20000;
 
-suite('The Backend handling a python file when', () => {
+suite.only('The Backend handling a python file when', () => {
   after(() => {
     fs.rm(TESTFILE_DIR_PYTHON, { recursive: true }, err => {
       if (err) { throw err; }

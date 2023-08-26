@@ -4,9 +4,9 @@ import * as fs from 'fs';
 import { TESTFILE_DIR_JAVA, TestExecutionHelper, executeExtension, loadTraceFromContext } from '../TestExecutionHelper';
 import * as TestFileContents from './JavaTestFileContents';
 
-const MAX_TEST_DURATION = 30000;
+const MAX_TEST_DURATION = 50000;
 
-suite.skip('The Backend handling a java file when', () => {
+suite('The Backend handling a java file when', () => {
     after(() => {
         fs.rm(TESTFILE_DIR_JAVA, { recursive: true }, err => {
             if (err) { throw err; }

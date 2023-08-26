@@ -3,6 +3,18 @@
  */
 type SupportedLanguages = 'python' | 'java';
 
+/**
+ * Supported steps for debugger
+ */
+type DebuggerStep = 'stepIn' | 'stepOut' | 'continue' | 'next';
+
+/** 
+ * For better readable code
+*/
+type Try = Success | Failure;
+type Success = { result: any };
+type Failure = { errorMessage: string };
+
 // State Types for the Frontend
 type FrontendTrace = Array<FrontendTraceElem>;
 type FrontendTraceElem = [number, string, string];
@@ -19,25 +31,36 @@ type Primitive = number | string | boolean;
 
 type Address = number;
 
-type HeapType = 'list' | 'tuple' | 'set' | 'dict' | 'class';
-type HeapV = Array<Value> | Map<any, Value> | ClassValue;
+type HeapType = 'list' | 'tuple' | 'set' | 'dict' | 'class' | 'wrapper';
+// java: 'String[]' type
+type HeapV = Array<Value> | Map<any, Value> | ClassValue | Array<[Value, Value]>;
 
 type RawHeapValue = {
   ref: Address;
   type: HeapType;
+  name: string,
   value: HeapV;
 };
 
 type Value =
+  /* all languages */
   | { type: 'int'; value: number }
   | { type: 'float'; value: number }
   | { type: 'str'; value: string }
+  | { type: 'none'; value: string }
   | { type: 'bool'; value: string }
-  | { type: 'ref'; value: Address };
+  | { type: 'ref'; value: Address }
+  /* Java addition */
+  | { type: 'byte'; value: number }
+  | { type: 'short'; value: number }
+  | { type: 'long'; value: number }
+  | { type: 'double'; value: number }
+  | { type: 'number'; value: number }
+  | { type: 'char'; value: string };
+
 
 type StackElem = {
   frameName: string;
-  frameId: number;
   locals: Map<string, Value>;
 };
 
@@ -46,8 +69,11 @@ type HeapValue =
   | { type: 'tuple'; value: Array<Value> }
   | { type: 'set'; value: Array<Value> }
   | { type: 'dict'; value: Map<any, Value> }
+  | { type: 'map'; mapType: string, value: Array<[Value, Value]> }
   | { type: 'class'; value: ClassValue }
-  | { type: 'instance'; value: string };
+  | { type: 'instance'; name: string, value: Map<string, Value> }
+  | { type: 'wrapper'; name: string; value: Value | Array<Value> };
+// wrapper type -> frontend list elements dodge
 
 type ClassValue = {
   className: string;

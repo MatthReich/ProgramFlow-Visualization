@@ -14,6 +14,7 @@ window.addEventListener("message", (event) => {
     case "updateButtons":
       document.querySelector("#nextButton").disabled = !message.next;
       document.querySelector("#prevButton").disabled = !message.prev;
+      document.querySelector("#firstButton").disabled = !message.first;
       document.querySelector("#lastButton").disabled = !message.last;
       break;
     case "updateContent":
@@ -71,9 +72,8 @@ function updateIntend(traceElem) {
   const heapTags = traceElem[2].match(/(?<=startPointer)[0-9]+/g);
   if (heapTags) {
     heapTags.forEach((tag) => {
-      document
-        .getElementById("objectItem" + tag)
-        .classList.add("object-intendation");
+      const element = document.getElementById("objectItem" + tag);
+      if (element) { element.classList.add("object-intendation"); }
     });
   }
 }
@@ -85,25 +85,28 @@ function updateIntend(traceElem) {
  */
 function updateRefArrows(traceElem) {
   const tags = getCurrentTags(traceElem);
+  refTags.forEach((tag) => tag.remove());
+  refTags = [];
 
   if (!tags) {
     return;
   }
 
-  refTags.forEach((tag) => tag.remove());
-  refTags = tags.map((tag) => {
-    return new LeaderLine(tag.elem1, tag.elem2, {
-      size: 2,
-      path: "magnet",
-      startSocket: "right",
-      endSocket: "left",
-      startPlug: "square",
-      startSocketGravity: [50, -10],
-      endSocketGravity: [-5, -5],
-      endPlug: "arrow1",
-      color: getColor(tag),
+  refTags = tags
+    .filter((tag) => tag.elem1 && tag.elem2)
+    .map((tag) => {
+      return new LeaderLine(tag.elem1, tag.elem2, {
+        size: 2,
+        path: "magnet",
+        startSocket: "right",
+        endSocket: "left",
+        startPlug: "square",
+        startSocketGravity: [50, -10],
+        endSocketGravity: [-5, -5],
+        endPlug: "arrow1",
+        color: getColor(tag),
+      });
     });
-  });
 }
 
 /**
@@ -114,34 +117,37 @@ function updateRefArrows(traceElem) {
  * @returns A list with all ids that have either a start or end pointer id in the html
  */
 function getCurrentTags(traceElem) {
-  const normalTags = traceElem[1].match(/(?<=id=")(.+)Pointer[0-9]+/g);
+  const stackTags = traceElem[1].match(/(?<=id=")(.+)Pointer[0-9]+/g);
   const heapTags = traceElem[2].match(/(?<=startPointer)[0-9]+/g);
+  const uniqueId = traceElem[2].match(/(?<=)\d+(?=startPointer)/g);
 
-  if (!normalTags) {
-    return [];
+  if (!stackTags) {
+    return;
   }
 
-  let s = [];
-  const t = normalTags.map((normalTag) => {
-    const id = normalTag.match(/(?<=.+)[0-9]+/g);
+  const stackRefs = stackTags.map((tag) => {
+    const id = tag.match(/(?<=.*Pointer)[\d]+/g);
     return {
       tag: id,
-      elem1: document.getElementById(normalTag),
+      elem1: document.getElementById(tag),
       elem2: document.getElementById("heapEndPointer" + id),
     };
   });
 
+  let heapRefs = [];
   if (heapTags) {
-    s = heapTags.map((t) => {
+    heapRefs = heapTags.map((reference, index) => {
       return {
-        tag: t,
-        elem1: document.getElementById("startPointer" + t),
-        elem2: document.getElementById("heapEndPointer" + t),
+        tag: reference,
+        elem1: document.getElementById(
+          uniqueId[index] + "startPointer" + reference
+        ),
+        elem2: document.getElementById("heapEndPointer" + reference),
       };
     });
   }
 
-  return [...s, ...t];
+  return [...heapRefs, ...stackRefs];
 }
 
 /**
@@ -151,7 +157,7 @@ function getCurrentTags(traceElem) {
  * @returns
  */
 function getColor(tag) {
-  let hue = ((0.618033988749895 + tag.tag / 10) % 1) * 100;
+  const hue = ((0.618033988749895 + tag.tag / 10) % 1) * 100;
   return `hsl(${hue}, 60%, 45%)`;
 }
 
@@ -159,6 +165,7 @@ function onLoad() {
   document.querySelector("#nextButton").disabled = false;
   document.querySelector("#lastButton").disabled = false;
   document.querySelector("#prevButton").disabled = true;
+  document.querySelector("#firstButton").disabled = true;
 }
 
 async function onClick(type) {

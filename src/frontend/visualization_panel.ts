@@ -1,11 +1,7 @@
 import * as vscode from 'vscode';
 import { currentLineExecuteHighlightType, nextLineExecuteHighlightType } from '../constants';
-import {
-  backendToFrontend,
-  createDecorationOptions,
-  getOpenEditors
-} from '../utils';
 import path = require('path');
+import { HTMLGenerator } from './HTMLGenerator';
 
 const FRONTEND_RESOURCE_PATH = 'src/frontend/resources';
 
@@ -16,13 +12,14 @@ export class VisualizationPanel {
   private readonly _lineScript: vscode.Uri;
   private readonly _trace: FrontendTrace;
   private _traceIndex: number;
+  private _fileTextEditor: vscode.TextEditor;
 
   private constructor(context: vscode.ExtensionContext, trace: BackendTrace) {
-    this._trace = trace.map(backendToFrontend);
+    this._trace = (new HTMLGenerator(trace)).generateHTML();
     this._traceIndex = 0;
     const panel = vscode.window.createWebviewPanel(
-      'python-visualization',
-      'Code Visualization',
+      'programflow-visualization',
+      'Code Visualization', // TODO adjust name to original file name
       vscode.ViewColumn.Beside,
       {
         enableScripts: true,
@@ -39,6 +36,7 @@ export class VisualizationPanel {
     this._script = panel.webview.asWebviewUri(scriptFile);
     this._lineScript = panel.webview.asWebviewUri(lineFile);
     this._panel = panel;
+    this._fileTextEditor = vscode.window.activeTextEditor!;
 
     this._panel.onDidChangeViewState(async (e) => {
       if (e.webviewPanel.active) {
@@ -55,7 +53,7 @@ export class VisualizationPanel {
       context.subscriptions
     );
 
-    // TODO irgendwas mit api dass fenster switched dann aufhören zu vizzen und dann wieder back active wenn wieder das hier aktiv ist
+    vscode.window.onDidChangeActiveTextEditor(_ => this.updateLineHighlight(), undefined, context.subscriptions);
 
     // Message Receivers
     this._panel.webview.onDidReceiveMessage(
@@ -76,7 +74,6 @@ export class VisualizationPanel {
   }
 
   public static async getVisualizationPanel(
-    id: string,
     context: vscode.ExtensionContext,
     trace: BackendTrace
   ): Promise<VisualizationPanel | undefined> {
@@ -132,6 +129,7 @@ export class VisualizationPanel {
           <p>/${this._trace.length - 1}</p>
         </div>
         <div class="row margin-vertical">
+          <button class="margin-horizontal" id="firstButton" type="button" onclick="onClick('first')">First</button>
           <button class="margin-horizontal" id="prevButton" type="button" onclick="onClick('prev')">Prev</button>
           <button class="margin-horizontal" id="nextButton" type="button" onclick="onClick('next')">Next</button>
           <button class="margin-horizontal" id="lastButton" type="button" onclick="onClick('last')">Last</button>
@@ -142,11 +140,9 @@ export class VisualizationPanel {
   }
 
   private updateLineHighlight(remove: boolean = false) {
-    // Can be undefined if no editor has focus
-    // FIXME: Better editor selection for line highlighting
-    const openEditors = getOpenEditors();
-    if (openEditors.length !== 1) { return; }
-    const editor = openEditors[0];
+    const editor = vscode.window.visibleTextEditors.filter(
+      editor => editor.document.uri === this._fileTextEditor.document.uri
+    )[0];
 
     if (remove) {
       editor.setDecorations(nextLineExecuteHighlightType, []);
@@ -176,7 +172,7 @@ export class VisualizationPanel {
   private setEditorDecorations(editor: vscode.TextEditor, highlightType: vscode.TextEditorDecorationType, line: number) {
     editor.setDecorations(
       highlightType,
-      createDecorationOptions(
+      this.createDecorationOptions(
         new vscode.Range(new vscode.Position(line, 0), new vscode.Position(line, 999))
       )
     );
@@ -200,6 +196,8 @@ export class VisualizationPanel {
         break;
       case 'prev': --this._traceIndex;
         break;
+      case 'first': this._traceIndex = 0;
+        break;
       case 'last': this._traceIndex = this._trace.length - 1;
         break;
       default:
@@ -208,16 +206,18 @@ export class VisualizationPanel {
   }
 
   private async postMessagesToWebview(...args: string[]) {
-    args.forEach(async (message) => {
+    for (const message of args) {
       switch (message) {
         case 'updateButtons':
           const nextActive = this._traceIndex < this._trace.length - 1;
           const prevActive = this._traceIndex > 0;
+          const firstActive = this._traceIndex > 0;
           const lastActive = this._traceIndex !== this._trace.length - 1;
           await this._panel!.webview.postMessage({
             command: 'updateButtons',
             next: nextActive,
             prev: prevActive,
+            first: firstActive,
             last: lastActive,
           });
           break;
@@ -229,6 +229,14 @@ export class VisualizationPanel {
           });
           break;
       }
-    });
+    };
+  }
+
+  private createDecorationOptions(range: vscode.Range): vscode.DecorationOptions[] {
+    return [
+      {
+        range: range,
+      },
+    ];
   }
 }

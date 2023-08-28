@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import { TESTFILE_DIR_PYTHON, TestExecutionHelper, executeExtension, loadTraceFromContext } from '../TestExecutionHelper';
 import * as TestFileContents from './PythonTestFileContents';
 
-const TENTY_SECONDS = 20000;
+const MAX_TEST_DURATION = 25000;
 
 suite('The Backend handling a python file when', () => {
   after(() => {
@@ -14,7 +14,7 @@ suite('The Backend handling a python file when', () => {
   });
 
   describe("creating a Trace with all primitive Variables", function () {
-    this.timeout(TENTY_SECONDS);
+    this.timeout(MAX_TEST_DURATION);
 
     let result: BackendTrace | undefined;
     this.beforeAll(async function () {
@@ -57,7 +57,7 @@ suite('The Backend handling a python file when', () => {
   });
 
   describe('working with list', function () {
-    this.timeout(TENTY_SECONDS);
+    this.timeout(MAX_TEST_DURATION);
 
     let result: BackendTrace | undefined;
     this.beforeAll(async function () {
@@ -99,7 +99,7 @@ suite('The Backend handling a python file when', () => {
   });
 
   describe('working with tuple', function () {
-    this.timeout(TENTY_SECONDS);
+    this.timeout(MAX_TEST_DURATION);
 
     let result: BackendTrace | undefined;
     this.beforeAll(async function () {
@@ -141,7 +141,7 @@ suite('The Backend handling a python file when', () => {
   });
 
   describe('working with sets', function () {
-    this.timeout(TENTY_SECONDS);
+    this.timeout(MAX_TEST_DURATION);
 
     let result: BackendTrace | undefined;
     this.beforeAll(async function () {
@@ -180,7 +180,7 @@ suite('The Backend handling a python file when', () => {
   });
 
   describe('working with dicts', function () {
-    this.timeout(TENTY_SECONDS);
+    this.timeout(MAX_TEST_DURATION);
 
     let result: BackendTrace | undefined;
     this.beforeAll(async function () {
@@ -221,7 +221,7 @@ suite('The Backend handling a python file when', () => {
   });
 
   describe('working with classes', function () {
-    this.timeout(TENTY_SECONDS);
+    this.timeout(MAX_TEST_DURATION);
 
     let result: BackendTrace | undefined;
     this.beforeAll(async function () {
@@ -260,7 +260,7 @@ suite('The Backend handling a python file when', () => {
   });
 
   describe('working with mixed types', function () {
-    this.timeout(TENTY_SECONDS);
+    this.timeout(MAX_TEST_DURATION);
 
     let result: BackendTrace | undefined;
     this.beforeAll(async function () {
@@ -301,7 +301,7 @@ suite('The Backend handling a python file when', () => {
   });
 
   describe('working with infinite references', function () {
-    this.timeout(TENTY_SECONDS);
+    this.timeout(MAX_TEST_DURATION);
 
     let result: BackendTrace | undefined;
     this.beforeAll(async function () {

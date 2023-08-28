@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import { TESTFILE_DIR_JAVA, TestExecutionHelper, executeExtension, loadTraceFromContext } from '../TestExecutionHelper';
 import * as TestFileContents from './JavaTestFileContents';
 
-const MAX_TEST_DURATION = 200000;
+const MAX_TEST_DURATION = 50000;
 
 suite.only('The Backend handling a java file when', () => {
     after(() => {

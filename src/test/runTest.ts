@@ -13,7 +13,7 @@ async function main() {
 		// Passed to --extensionTestsPath
 		const extensionTestsPath = path.resolve(__dirname, './suite/index');
 
-		const vscodeExecutablePath = await downloadAndUnzipVSCode('insiders');
+		const vscodeExecutablePath = await downloadAndUnzipVSCode('stable');
 		const [cliPath, ...args] = resolveCliArgsFromVSCodeExecutablePath(vscodeExecutablePath);
 		cp.spawnSync(
 			cliPath,

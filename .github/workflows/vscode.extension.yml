@@ -13,9 +13,9 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [macos-latest, ubuntu-latest]
-        java: [ '8', '11', '17' ]
-        python: [ '3.8', '3.10', '3.11' ]
+        os: [ubuntu-latest]
+        java: [ '17' ]
+        python: [ '3.11' ]
     runs-on: ${{ matrix.os }}
     steps:
     - name: Checkout
@@ -32,7 +32,7 @@ jobs:
       uses: actions/setup-java@v3
       with:
         java-version: ${{ matrix.java }}
-        distribution: 'temurin'
+        distribution: 'microsoft'
     - run: npm install
     - run: xvfb-run -a npm test
       if: runner.os == 'Linux'

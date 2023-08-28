@@ -5,7 +5,7 @@ import { TESTFILE_DIR_JAVA, TestExecutionHelper, executeExtension, loadTraceFrom
 import * as TestFileContents from './JavaTestFileContents';
 
 const MAX_TEST_DURATION = 50000;
-const BEFORE_WAITING_TIME = 3000;
+const BEFORE_WAITING_TIME = 5000;
 
 suite.only('The Backend handling a java file when', () => {
     after(() => {

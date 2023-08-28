@@ -2,7 +2,7 @@
   "name": "programflow-visualization",
   "displayName": "programflow-visualization",
   "description": "This extension is visualizing the execution of programs like python or java",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "engines": {
     "vscode": "^1.71.0"
   },

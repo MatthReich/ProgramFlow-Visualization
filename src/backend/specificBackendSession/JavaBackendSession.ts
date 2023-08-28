@@ -3,6 +3,7 @@ import { scopesRequest, variablesRequest, createStackElemFrom, BasicTypes } from
 import * as VariableMapper from "../VariableMapper";
 import { ILanguageBackendSession } from "../ILanguageBackendSession";
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 enum NumberClasses { 'Number', 'Byte', 'Short', 'Integer', 'Long', 'Float', 'Double', 'BigDecimal' }
 
 export const javaBackendSession: ILanguageBackendSession = {

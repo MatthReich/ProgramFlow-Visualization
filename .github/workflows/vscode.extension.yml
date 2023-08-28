@@ -13,7 +13,9 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-2019]
+        os: [macos-latest, ubuntu-latest]
+        java: [ '8', '11', '17' ]
+        python: [ '3.8.10', '3.10.11', '3.11.4' ]
     runs-on: ${{ matrix.os }}
     steps:
     - name: Checkout
@@ -22,15 +24,16 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: 19.x
-    - name: Set up Python 3.10
+    - name: Set up Python 
       uses: actions/setup-python@v3
       with:
-        python-version: "3.10"
-    - name: Set up JDK 17
+        python-version: ${{ matrix.java }}
+    - name: Set up JDK
       uses: actions/setup-java@v3
       with:
-        java-version: '17'
+        java-version: ${{ matrix.java }}
         distribution: 'microsoft'
+        check-latest: true
     - run: npm install
     - run: xvfb-run -a npm test
       if: runner.os == 'Linux'

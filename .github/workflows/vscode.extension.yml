@@ -30,7 +30,7 @@ jobs:
       uses: actions/setup-java@v3
       with:
         java-version: '17'
-        distribution: 'temurin'
+        distribution: 'microsoft'
     - run: npm install
     - run: xvfb-run -a npm test
       if: runner.os == 'Linux'

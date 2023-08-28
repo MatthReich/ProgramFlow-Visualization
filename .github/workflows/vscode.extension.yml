@@ -27,7 +27,7 @@ jobs:
     - name: Set up Python 
       uses: actions/setup-python@v3
       with:
-        python-version: ${{ matrix.java }}
+        python-version: ${{ matrix.python }}
     - name: Set up JDK
       uses: actions/setup-java@v3
       with:

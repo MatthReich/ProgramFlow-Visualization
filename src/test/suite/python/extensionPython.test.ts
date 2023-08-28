@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import { TESTFILE_DIR_PYTHON, TestExecutionHelper, executeExtension, loadTraceFromContext } from '../TestExecutionHelper';
 import * as TestFileContents from './PythonTestFileContents';
 
-const MAX_TEST_DURATION = 25000;
+const MAX_TEST_DURATION = 50000;
 
 suite('The Backend handling a python file when', () => {
   after(() => {

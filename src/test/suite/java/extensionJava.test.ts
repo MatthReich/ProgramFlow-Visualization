@@ -6,14 +6,14 @@ import * as TestFileContents from './JavaTestFileContents';
 
 const MAX_TEST_DURATION = 50000;
 
-suite.only('The Backend handling a java file when', () => {
+suite.skip('The Backend handling a java file when', () => {
     after(() => {
         fs.rm(TESTFILE_DIR_JAVA, { recursive: true }, err => {
             if (err) { throw err; }
         });
     });
 
-    describe.skip("creating a Trace with all primitive Variables", function () {
+    describe("creating a Trace with all primitive Variables", function () {
         this.timeout(MAX_TEST_DURATION);
 
         let result: BackendTrace | undefined;

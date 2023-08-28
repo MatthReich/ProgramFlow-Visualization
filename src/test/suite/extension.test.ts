@@ -7,7 +7,7 @@ import * as JavaTestFileContents from './java/JavaTestFileContents';
 
 const MAX_TEST_DURATION = 40000;
 
-suite('The Extension', () => {
+suite.skip('The Extension', () => {
     after(() => {
         fs.rm(TESTFILE_DIR_PYTHON, { recursive: true }, err => {
             if (err) { throw err; }

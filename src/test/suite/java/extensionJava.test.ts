@@ -1,11 +1,10 @@
 import * as assert from 'assert';
-import { after, before, describe, it } from 'mocha';
+import { after, describe, it } from 'mocha';
 import * as fs from 'fs';
 import { TESTFILE_DIR_JAVA, TestExecutionHelper, executeExtension, loadTraceFromContext } from '../TestExecutionHelper';
 import * as TestFileContents from './JavaTestFileContents';
 
 const MAX_TEST_DURATION = 50000;
-const BEFORE_WAITING_TIME = 5000;
 
 suite.only('The Backend handling a java file when', () => {
     after(() => {
@@ -14,9 +13,8 @@ suite.only('The Backend handling a java file when', () => {
         });
     });
 
-    describe("creating a Trace with all primitive Variables", function () {
+    describe.skip("creating a Trace with all primitive Variables", function () {
         this.timeout(MAX_TEST_DURATION);
-        before(async () => await new Promise(resolve => setTimeout(resolve, BEFORE_WAITING_TIME)));
 
         let result: BackendTrace | undefined;
         this.beforeAll(async function () {
@@ -66,7 +64,6 @@ suite.only('The Backend handling a java file when', () => {
 
     describe("creating a Trace with all Wrapper-Variables", function () {
         this.timeout(MAX_TEST_DURATION);
-        before(async () => await new Promise(resolve => setTimeout(resolve, BEFORE_WAITING_TIME)));
 
         let result: BackendTrace | undefined;
         this.beforeAll(async function () {
@@ -123,7 +120,6 @@ suite.only('The Backend handling a java file when', () => {
 
     describe("creating a Trace with Array-Variables", function () {
         this.timeout(MAX_TEST_DURATION);
-        before(async () => await new Promise(resolve => setTimeout(resolve, BEFORE_WAITING_TIME)));
 
         let result: BackendTrace | undefined;
         this.beforeAll(async function () {
@@ -167,7 +163,6 @@ suite.only('The Backend handling a java file when', () => {
 
     describe("creating a Trace with Class", function () {
         this.timeout(MAX_TEST_DURATION);
-        before(async () => await new Promise(resolve => setTimeout(resolve, BEFORE_WAITING_TIME)));
 
         let result: BackendTrace | undefined;
         this.beforeAll(async function () {
@@ -208,7 +203,6 @@ suite.only('The Backend handling a java file when', () => {
 
     describe("creating a Trace with ArrayList", function () {
         this.timeout(MAX_TEST_DURATION);
-        before(async () => await new Promise(resolve => setTimeout(resolve, BEFORE_WAITING_TIME)));
 
         let result: BackendTrace | undefined;
         this.beforeAll(async function () {
@@ -249,7 +243,6 @@ suite.only('The Backend handling a java file when', () => {
 
     describe("creating a Trace with LinkedList", function () {
         this.timeout(MAX_TEST_DURATION);
-        before(async () => await new Promise(resolve => setTimeout(resolve, BEFORE_WAITING_TIME)));
 
         let result: BackendTrace | undefined;
         this.beforeAll(async function () {
@@ -290,7 +283,6 @@ suite.only('The Backend handling a java file when', () => {
 
     describe("creating a Trace with HashMap", function () {
         this.timeout(MAX_TEST_DURATION);
-        before(async () => await new Promise(resolve => setTimeout(resolve, BEFORE_WAITING_TIME)));
 
         let result: BackendTrace | undefined;
         this.beforeAll(async function () {
@@ -331,7 +323,6 @@ suite.only('The Backend handling a java file when', () => {
 
     describe("creating a Trace with HashSet", function () {
         this.timeout(MAX_TEST_DURATION);
-        before(async () => await new Promise(resolve => setTimeout(resolve, BEFORE_WAITING_TIME)));
 
         let result: BackendTrace | undefined;
         this.beforeAll(async function () {

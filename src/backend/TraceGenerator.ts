@@ -5,6 +5,7 @@ import * as FileHandler from '../FileHandler';
 import { getDebugConfigurationFor, registerDebugAdapterTracker } from './DebugAdapterTracker';
 
 export const linesWithClass: Array<number> = [];
+export const linesWithImport: Array<number> = [];
 
 export class TraceGenerator {
     backendTrace: BackendTrace = [];
@@ -23,7 +24,7 @@ export class TraceGenerator {
     async generateTrace(): Promise<BackendTrace | undefined> {
         // PRE QUERIES
         if (this.language === 'python') {
-            setLinesWithClass(this.fileContent);
+            setSpecialLines(this.fileContent);
         }
         const tempFile = this.language === 'python' ? await FileHandler.duplicateFileAndExtendWithPass(this.file, this.fileContent) : this.file;
         if (!tempFile) {
@@ -56,11 +57,13 @@ export class TraceGenerator {
     }
 }
 
-function setLinesWithClass(fileContent: string) {
+function setSpecialLines(fileContent: string) {
     fileContent.split("\n").forEach((line, index) => {
         if (line.startsWith("class ")) {
             linesWithClass.push(index + 1);
-        };
+        } else if (line.includes("import") ) {
+            linesWithImport.push(index + 1);
+        }
     });
 }
 

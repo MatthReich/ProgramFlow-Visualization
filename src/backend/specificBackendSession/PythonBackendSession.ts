@@ -2,7 +2,10 @@ import * as vscode from 'vscode';
 import * as VariableMapper from "../VariableMapper";
 import { scopesRequest, variablesRequest, createStackElemFrom, BasicTypes } from "../BackendSession";
 import { ILanguageBackendSession } from '../ILanguageBackendSession';
-import { linesWithClass } from '../TraceGenerator';
+import { linesWithClass, linesWithImport } from '../TraceGenerator';
+
+let importIgnoreList: any[] = [];
+let lastLine: number = 0;
 
 export const pythonBackendSession: ILanguageBackendSession = {
     createStackAndHeap: async (
@@ -16,11 +19,19 @@ export const pythonBackendSession: ILanguageBackendSession = {
         for (const stackFrame of stackFrames) {
             const scopes = await scopesRequest(session, stackFrame.id);
             const [locals, globals] = [scopes[0], scopes[1]];
-            const localsVariables = (await variablesRequest(session, locals.variablesReference)).filter((variable) => !variable.name.includes('(return)'));
+            const unfilteredLocalsVariables = await variablesRequest(session, locals.variablesReference);
+            const localsVariables = (unfilteredLocalsVariables).filter((variable) => !variable.name.includes('(return)') && !importIgnoreList.includes(JSON.stringify(variable)));
 
             if (linesWithClass.includes(stackFrame.line)) {
                 debuggerStep = 'next';
             }
+
+            if (linesWithImport.includes(lastLine)) {
+                importIgnoreList = importIgnoreList.concat(unfilteredLocalsVariables.map(variable => JSON.stringify(variable)));
+                lastLine = stackFrame.line;
+                return [stack, heap, 'next'];
+            }
+            lastLine = stackFrame.line;
 
             const primitiveVariables = localsVariables.filter((variable) =>
                 variable.variablesReference === 0
@@ -41,13 +52,17 @@ export const pythonBackendSession: ILanguageBackendSession = {
                                 variable.variablesReference > 0 &&
                                 (variable.name === 'class variables' || variable.name === 'function variables')
                         ).map(async (variable) => {
-                            return await variablesRequest(session, variable.variablesReference);
+                            return (await variablesRequest(session, variable.variablesReference)).filter(variable => !variable.type.startsWith("_"));
                         })
                 )
             ).flat();
 
             const heapVariables = [...heapVariablesWithoutSpecial, ...specialVariables];
             const allVariables = [...primitiveVariables, ...heapVariables];
+
+            if (allVariables.length < 1) {
+                return [stack, heap, debuggerStep];
+            }
 
             stack.push(createStackElemFrom(stackFrame, allVariables));
 
@@ -121,7 +136,7 @@ async function createHeapVariable(variable: Variable, session: vscode.DebugSessi
 
 function addNewElementToList(isMapType: boolean, list: Map<string, Value> | Value[], actualVariable: Variable) {
     if (isMapType) {
-        (list as Map<string, Value>).set(actualVariable.name, VariableMapper.toValue(actualVariable))
+        (list as Map<string, Value>).set(actualVariable.name, VariableMapper.toValue(actualVariable));
     } else {
         (list as Array<Value>).push(VariableMapper.toValue(actualVariable));
     }
@@ -154,25 +169,27 @@ async function createInnerHeapVariable(variable: Variable, session: vscode.Debug
         const [actualVariable, ...remainingVariables] = listForDepth;
         listForDepth = remainingVariables;
 
-        const variablesReference = actualVariable.variablesReference;
-        if (!visitedSet.has(variablesReference)) {
-            visitedSet.add(actualVariable.variablesReference);
+        if (actualVariable) {
+            const variablesReference = actualVariable.variablesReference;
+            if (!visitedSet.has(variablesReference)) {
+                visitedSet.add(actualVariable.variablesReference);
 
-            if (variablesReference) {
-                const elem = await createInnerHeapVariable(actualVariable, session, referenceMap, visitedSet);
-                rawHeapValues = rawHeapValues.concat(elem);
+                if (variablesReference) {
+                    const elem = await createInnerHeapVariable(actualVariable, session, referenceMap, visitedSet);
+                    rawHeapValues = rawHeapValues.concat(elem);
+                }
             }
-        }
 
-        heapValue = getUpdateForHeapV(variable, actualVariable, heapValue, VariableMapper.toValue(actualVariable));
+            heapValue = getUpdateForHeapV(variable, actualVariable, heapValue, VariableMapper.toValue(actualVariable));
+        }
     } while (listForDepth.length > 0);
 
-    return rawHeapValues.concat({
+    return heapValue ? rawHeapValues.concat({
         ref: variable.variablesReference,
         type: variable.type,
         name: nameOfInstance,
         value: heapValue
-    } as RawHeapValue);
+    } as RawHeapValue) : rawHeapValues;
 }
 
 function ifIsInstanceGetName(variable: Variable) {
@@ -205,7 +222,12 @@ function getUpdateForHeapV(variable: Variable, actualVariable: Variable, actualH
                 ? (actualHeapV as Map<any, Value>).set(value.value, value)
                 : new Map<any, Value>().set(value.value, value);
         case 'class':
-            return { className: '', properties: new Map<string, Value>() };
+            if (actualHeapV) {
+                const newProperties = (actualHeapV as ClassValue).properties.set(actualVariable.name, value);
+                const oldClassName = (actualHeapV as ClassValue).className;
+                return { className: oldClassName, properties: newProperties };
+            }
+            return { className: '', properties: new Map<string, Value>().set(actualVariable.name, value) };
         case 'type':
             return actualHeapV
                 ? (actualHeapV as Map<string, Value>).set(variable.name, value)

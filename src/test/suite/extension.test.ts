@@ -12,6 +12,9 @@ suite('The Extension', () => {
         fs.rm(TESTFILE_DIR_PYTHON, { recursive: true }, err => {
             if (err) { throw err; }
         });
+        fs.rm(TESTFILE_DIR_JAVA, { recursive: true }, err => {
+            if (err) { throw err; }
+        });
     });
 
     describe("generating trace for a java file after python file", function () {

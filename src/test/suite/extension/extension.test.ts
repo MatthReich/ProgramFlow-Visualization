@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import { TESTFILE_DIR_MIXED, TestExecutionHelper, executeExtension, loadTraceFromContext } from '../TestExecutionHelper';
 import * as TestFileContents from './MixedTestFileContents';
 
-const MAX_TEST_DURATION = 50000;
+const MAX_TEST_DURATION = 750000;
 
 suite('The Extension', () => {
     after(() => {

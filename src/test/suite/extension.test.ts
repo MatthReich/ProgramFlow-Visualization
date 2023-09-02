@@ -5,9 +5,9 @@ import { TESTFILE_DIR_PYTHON, TESTFILE_DIR_JAVA, TestExecutionHelper, executeExt
 import * as PythonTestFileContents from './python/PythonTestFileContents';
 import * as JavaTestFileContents from './java/JavaTestFileContents';
 
-const MAX_TEST_DURATION = 40000;
+const MAX_TEST_DURATION = 50000;
 
-suite.skip('The Extension', () => {
+suite('The Extension', () => {
     after(() => {
         fs.rm(TESTFILE_DIR_PYTHON, { recursive: true }, err => {
             if (err) { throw err; }

@@ -6,7 +6,7 @@ import * as TestFileContents from './JavaTestFileContents';
 
 const MAX_TEST_DURATION = 75000;
 
-suite.skip('The Backend handling a java file when', () => {
+suite('The Backend handling a java file when', () => {
     after(() => {
         fs.rm(TESTFILE_DIR_JAVA, { recursive: true }, err => {
             if (err) { throw err; }

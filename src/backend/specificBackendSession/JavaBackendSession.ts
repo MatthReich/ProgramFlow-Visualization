@@ -134,7 +134,7 @@ async function createHeapVariable(variable: Variable, duplicateReferencesMap: Ma
 
         if (actualVariable.type === 'String') {
             const [variableRefValue, rawHeapValue] = createStackedStringHeapValue(actualVariable);
-            rawHeapValues.push(rawHeapValue);
+            rawHeapValues = rawHeapValues.concat(rawHeapValue);
             isClass
                 ? (list as Map<string, Value>).set(actualVariable.name, variableRefValue)
                 : (list as Array<Value>).push(variableRefValue);

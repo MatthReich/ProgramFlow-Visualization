@@ -135,9 +135,7 @@ async function createHeapVariable(variable: Variable, duplicateReferencesMap: Ma
         if (actualVariable.type === 'String') {
             const [variableRefValue, rawHeapValue] = createStackedStringHeapValue(actualVariable);
             rawHeapValues.push(rawHeapValue);
-            isClass
-                ? (list as Map<string, Value>).set(actualVariable.name, variableRefValue)
-                : (list as Array<Value>).push(variableRefValue);
+            (list as Array<Value>).push(variableRefValue);
             continue;
         }
 
@@ -146,9 +144,7 @@ async function createHeapVariable(variable: Variable, duplicateReferencesMap: Ma
                 type: getTypeOf(actualVariable),
                 value: actualVariable.value.split("\"")[1]
             } as Variable);
-            isClass
-                ? (list as Map<string, Value>).set(actualVariable.name, variableValue)
-                : (list as Array<Value>).push(variableValue);
+            (list as Array<Value>).push(variableValue);
             continue;
         }
 

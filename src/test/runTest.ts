@@ -32,7 +32,8 @@ async function main() {
 		await runTests({
 			vscodeExecutablePath,
 			extensionDevelopmentPath,
-			extensionTestsPath
+			extensionTestsPath,
+			launchArgs: ["--password-store=basic"],
 		});
 	} catch (err) {
 		console.error('Failed to run tests');

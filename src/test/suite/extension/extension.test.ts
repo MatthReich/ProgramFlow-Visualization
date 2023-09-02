@@ -6,7 +6,7 @@ import * as TestFileContents from './MixedTestFileContents';
 
 const MAX_TEST_DURATION = 50000;
 
-suite.only('The Extension', () => {
+suite('The Extension', () => {
     after(() => {
         fs.rm(TESTFILE_DIR_MIXED, { recursive: true }, err => {
             if (err) { throw err; }

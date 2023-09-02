@@ -132,7 +132,7 @@ async function createHeapVariable(variable: Variable, duplicateReferencesMap: Ma
         const stringRefKey = await updateDuplicateReferencesMap(duplicateReferencesMap, variable, session);
         variable['variablesReference'] = getRef(variable, duplicateReferencesMap, stringRefKey);
 
-        if (actualVariable.type === 'String') {
+        if (actualVariable.type === 'String') { 
             const [variableRefValue, rawHeapValue] = createStackedStringHeapValue(actualVariable);
             rawHeapValues = rawHeapValues.concat(rawHeapValue);
             isClass
@@ -141,7 +141,7 @@ async function createHeapVariable(variable: Variable, duplicateReferencesMap: Ma
             continue;
         }
 
-        if (isSpecialCase(variable, actualVariable)) {
+        if (isSpecialCase(variable, actualVariable)) { 
             const variableValue: Value = VariableMapper.toValue({
                 type: getTypeOf(actualVariable),
                 value: actualVariable.value.split("\"")[1]
@@ -261,7 +261,7 @@ async function createInnerHeapVariable(variable: Variable, duplicateReferencesMa
 
             if (actualVariable.type === 'String') {
                 const [variableRefValue, rawHeapValue] = createStackedStringHeapValue(actualVariable);
-                rawHeapValues.push(rawHeapValue);
+                rawHeapValues = rawHeapValues.concat(rawHeapValue);
                 heapValue = getUpdateForHeapV(variable, actualVariable, heapValue, variableRefValue);
                 continue;
             }
@@ -348,7 +348,7 @@ function getTypeOf(variable: Variable): string {
         return 'str';
     }
     else if (variable.value.includes("Character") && !variable.value.includes("[")) {
-        return 'char'; // TODO LinkedList Bug
+        return 'char';
     }
     else if (variable.value.includes("Boolean") && !variable.value.includes("[")) {
         return 'boolean';

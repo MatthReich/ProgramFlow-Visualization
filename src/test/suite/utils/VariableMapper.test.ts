@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import * as VariableMapper from "../../backend/VariableMapper";
+import * as VariableMapper from "../../../backend/VariableMapper";
 import { describe, it } from 'mocha';
 
 suite('A VariableMapper when', () => {

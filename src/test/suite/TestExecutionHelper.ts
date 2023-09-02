@@ -6,6 +6,7 @@ import { Commands, Variables } from '../../constants';
 export const TESTFILE_DIR: string = path.join(path.resolve(__dirname), "testfiles");
 export const TESTFILE_DIR_JAVA: string = path.join(path.resolve(__dirname), "testfiles/java");
 export const TESTFILE_DIR_PYTHON: string = path.join(path.resolve(__dirname), "testfiles/python");
+export const TESTFILE_DIR_MIXED: string = path.join(path.resolve(__dirname), "testfiles/mixed");
 
 export class TestExecutionHelper {
     public static async createTestFileWith(path: string, fileName: string, fileType: string, content: string): Promise<Uri> {

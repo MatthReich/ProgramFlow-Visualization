@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import Completer from '../../Completer';
+import Completer from '../../../Completer';
 import { describe, it } from 'mocha';
 
 

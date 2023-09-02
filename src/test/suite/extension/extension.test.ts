@@ -1,18 +1,14 @@
 import * as assert from 'assert';
 import { after, describe, it } from 'mocha';
 import * as fs from 'fs';
-import { TESTFILE_DIR_PYTHON, TESTFILE_DIR_JAVA, TestExecutionHelper, executeExtension, loadTraceFromContext } from './TestExecutionHelper';
-import * as PythonTestFileContents from './python/PythonTestFileContents';
-import * as JavaTestFileContents from './java/JavaTestFileContents';
+import { TESTFILE_DIR_MIXED, TestExecutionHelper, executeExtension, loadTraceFromContext } from '../TestExecutionHelper';
+import * as TestFileContents from './MixedTestFileContents';
 
 const MAX_TEST_DURATION = 50000;
 
-suite('The Extension', () => {
+suite.only('The Extension', () => {
     after(() => {
-        fs.rm(TESTFILE_DIR_PYTHON, { recursive: true }, err => {
-            if (err) { throw err; }
-        });
-        fs.rm(TESTFILE_DIR_JAVA, { recursive: true }, err => {
+        fs.rm(TESTFILE_DIR_MIXED, { recursive: true }, err => {
             if (err) { throw err; }
         });
     });
@@ -23,8 +19,8 @@ suite('The Extension', () => {
         let resultPython: BackendTrace | undefined;
         let resultJava: BackendTrace | undefined;
         this.beforeAll(async function () {
-            const testFilePython = await TestExecutionHelper.createTestFileWith(TESTFILE_DIR_PYTHON, "allPrimitiveVariables", "py", PythonTestFileContents.ALL_PRIMITIVE_VARIABLES);
-            const testFileJava = await TestExecutionHelper.createTestFileWith(TESTFILE_DIR_JAVA, "JavaPrimitiveVariableTestClass", "java", JavaTestFileContents.ALL_PRIMITIVE_VARIABLES);
+            const testFilePython = await TestExecutionHelper.createTestFileWith(TESTFILE_DIR_MIXED, "some1PrimitiveVariables", "py", TestFileContents.SOME_PYTHON_PRIMITIVE_VARIABLES);
+            const testFileJava = await TestExecutionHelper.createTestFileWith(TESTFILE_DIR_MIXED, "JavaPrimitiveVariableTest1Class", "java", TestFileContents.SOME_JAVA_PRIMITIVE_VARIABLES1);
 
             const contextPython = await executeExtension(testFilePython);
             resultPython = await loadTraceFromContext(testFilePython, contextPython);
@@ -48,8 +44,8 @@ suite('The Extension', () => {
         let resultPython: BackendTrace | undefined;
         let resultJava: BackendTrace | undefined;
         this.beforeAll(async function () {
-            const testFilePython = await TestExecutionHelper.createTestFileWith(TESTFILE_DIR_PYTHON, "allPrimitiveVariables", "py", PythonTestFileContents.ALL_PRIMITIVE_VARIABLES);
-            const testFileJava = await TestExecutionHelper.createTestFileWith(TESTFILE_DIR_JAVA, "JavaPrimitiveVariableTestClass", "java", JavaTestFileContents.ALL_PRIMITIVE_VARIABLES);
+            const testFilePython = await TestExecutionHelper.createTestFileWith(TESTFILE_DIR_MIXED, "some2PrimitiveVariables", "py", TestFileContents.SOME_PYTHON_PRIMITIVE_VARIABLES);
+            const testFileJava = await TestExecutionHelper.createTestFileWith(TESTFILE_DIR_MIXED, "JavaPrimitiveVariableTest2Class", "java", TestFileContents.SOME_JAVA_PRIMITIVE_VARIABLES2);
 
             const contextJava = await executeExtension(testFileJava);
             resultJava = await loadTraceFromContext(testFileJava, contextJava);

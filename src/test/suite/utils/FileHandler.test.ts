@@ -2,8 +2,8 @@ import * as assert from 'assert';
 import * as fs from 'fs';
 import { after, describe, it } from 'mocha';
 import * as vscode from 'vscode';
-import * as FileHandler from '../../FileHandler';
-import { TESTFILE_DIR, TestExecutionHelper } from './TestExecutionHelper';
+import * as FileHandler from '../../../FileHandler';
+import { TESTFILE_DIR, TestExecutionHelper } from '../TestExecutionHelper';
 import util = require('util');
 
 suite('A FileHandler when', () => {

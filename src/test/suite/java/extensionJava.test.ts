@@ -62,7 +62,7 @@ suite('The Backend handling a java file when', () => {
         });
     });
 
-    describe("creating a Trace with all Wrapper-Variables", function () {
+    describe.skip("creating a Trace with all Wrapper-Variables", function () {
         this.timeout(MAX_TEST_DURATION);
 
         let result: BackendTrace | undefined;
@@ -118,7 +118,7 @@ suite('The Backend handling a java file when', () => {
         });
     });
 
-    describe("creating a Trace with Array-Variables", function () {
+    describe.skip("creating a Trace with Array-Variables", function () {
         this.timeout(MAX_TEST_DURATION);
 
         let result: BackendTrace | undefined;

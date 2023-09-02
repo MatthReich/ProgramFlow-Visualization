@@ -132,7 +132,7 @@ async function createHeapVariable(variable: Variable, duplicateReferencesMap: Ma
         const stringRefKey = await updateDuplicateReferencesMap(duplicateReferencesMap, variable, session);
         variable['variablesReference'] = getRef(variable, duplicateReferencesMap, stringRefKey);
 
-        if (actualVariable.type === 'String') { 
+        if (actualVariable.type === 'String') { // FIXME Potentieller CI Break
             const [variableRefValue, rawHeapValue] = createStackedStringHeapValue(actualVariable);
             rawHeapValues = rawHeapValues.concat(rawHeapValue);
             isClass
@@ -141,7 +141,7 @@ async function createHeapVariable(variable: Variable, duplicateReferencesMap: Ma
             continue;
         }
 
-        if (isSpecialCase(variable, actualVariable)) { 
+        if (isSpecialCase(variable, actualVariable)) { // FIXME Potentieller CI Break
             const variableValue: Value = VariableMapper.toValue({
                 type: getTypeOf(actualVariable),
                 value: actualVariable.value.split("\"")[1]
@@ -259,14 +259,14 @@ async function createInnerHeapVariable(variable: Variable, duplicateReferencesMa
         if (!visitedSet.has(variablesReference)) {
             visitedSet.add(actualVariable.variablesReference);
 
-            if (actualVariable.type === 'String') {
+            if (actualVariable.type === 'String') { // FIXME Potentieller CI Break
                 const [variableRefValue, rawHeapValue] = createStackedStringHeapValue(actualVariable);
                 rawHeapValues = rawHeapValues.concat(rawHeapValue);
                 heapValue = getUpdateForHeapV(variable, actualVariable, heapValue, variableRefValue);
                 continue;
             }
 
-            if (isSpecialCase(variable, actualVariable)) {
+            if (isSpecialCase(variable, actualVariable)) { // FIXME Potentieller CI Break
                 const variableValue: Value = VariableMapper.toValue({
                     type: getTypeOf(actualVariable),
                     value: actualVariable.value.split("\"")[1]

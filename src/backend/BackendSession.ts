@@ -17,12 +17,17 @@ export async function createBackendTraceElem(
     debuggerStep = newDebuggerStep;
 
     const line = stackFrames[0].line;
-    return createBackendTraceElemFrom(line, stack, heap);
+    let filePath = stackFrames[0].source?.path;
+    if (filePath?.endsWith("_debug.py")) {
+        filePath = filePath.replace("_debug.py", ".py");
+    }
+    return createBackendTraceElemFrom(line, filePath! , stack, heap);
 }
 
-function createBackendTraceElemFrom(line: number, stack: Array<StackElem>, heap: Map<number, HeapValue>): BackendTraceElem {
+function createBackendTraceElemFrom(line: number, filePath: string, stack: Array<StackElem>, heap: Map<number, HeapValue>): BackendTraceElem {
     return {
         line: line,
+        filePath: filePath,
         stack: stack,
         heap: heap,
     };

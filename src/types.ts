@@ -17,12 +17,13 @@ type Failure = { errorMessage: string };
 
 // State Types for the Frontend
 type FrontendTrace = Array<FrontendTraceElem>;
-type FrontendTraceElem = [number, string, string];
+type FrontendTraceElem = [number, string, string, string];
 // ############################################################################################
 // State Types for the Backend
 type BackendTrace = Array<BackendTraceElem>;
 type BackendTraceElem = {
   line: number;
+  filePath: string,
   stack: Array<StackElem>;
   heap: Map<Address, HeapValue>;
 };

@@ -26,7 +26,7 @@ export class HTMLGenerator {
                     ${keys.map((name, index) => this.objectItem(name, values[index])).join('')}
                 <div>
             `;
-            this.frontendTrace.push([traceElement.line, frameItems, objectItems]);
+            this.frontendTrace.push([traceElement.line, frameItems, objectItems, traceElement.filePath]);
         });
         return this.frontendTrace;
     }

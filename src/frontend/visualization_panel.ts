@@ -12,7 +12,6 @@ export class VisualizationPanel {
   private readonly _lineScript: vscode.Uri;
   private readonly _trace: FrontendTrace;
   private _traceIndex: number;
-  private _fileTextEditor: vscode.TextEditor;
 
   private constructor(context: vscode.ExtensionContext, trace: BackendTrace) {
     this._trace = (new HTMLGenerator(trace)).generateHTML();
@@ -36,7 +35,6 @@ export class VisualizationPanel {
     this._script = panel.webview.asWebviewUri(scriptFile);
     this._lineScript = panel.webview.asWebviewUri(lineFile);
     this._panel = panel;
-    this._fileTextEditor = vscode.window.activeTextEditor!;
 
     this._panel.onDidChangeViewState(async (e) => {
       if (e.webviewPanel.active) {
@@ -53,7 +51,12 @@ export class VisualizationPanel {
       context.subscriptions
     );
 
-    vscode.window.onDidChangeActiveTextEditor(_ => this.updateLineHighlight(), undefined, context.subscriptions);
+    vscode.window.onDidChangeActiveTextEditor(_ => {
+      if (this._panel?.active) {
+        this.updateLineHighlight();
+      }
+    }, undefined, context.subscriptions); 
+      
 
     // Message Receivers
     this._panel.webview.onDidReceiveMessage(
@@ -139,10 +142,17 @@ export class VisualizationPanel {
       `;
   }
 
-  private updateLineHighlight(remove: boolean = false) {
-    const editor = vscode.window.visibleTextEditors.filter(
-      editor => editor.document.uri === this._fileTextEditor.document.uri
+  private async updateLineHighlight(remove: boolean = false) {
+    let editor: vscode.TextEditor | undefined = vscode.window.visibleTextEditors.filter(
+      editor => path.basename(editor.document.uri.path) === path.basename(this._trace[this._traceIndex][3]!)
     )[0];
+
+    const openPath = vscode.Uri.parse(this._trace[this._traceIndex][3]!);
+    if (!editor || editor.document.uri.path !== openPath.path) {
+      await vscode.commands.executeCommand('workbench.action.focusFirstEditorGroup');
+      const document = await vscode.workspace.openTextDocument(openPath);
+      editor = await vscode.window.showTextDocument(document);
+    }
 
     if (remove) {
       editor.setDecorations(nextLineExecuteHighlightType, []);
@@ -153,12 +163,20 @@ export class VisualizationPanel {
     }
   }
 
-  private setCurrentLineHighlighting(editor: vscode.TextEditor) {
+  private async setCurrentLineHighlighting(editor: vscode.TextEditor) {
     const currentLine = this._traceIndex > 0 ? this._trace[this._traceIndex - 1][0] - 1 : -1;
 
     if (currentLine > -1) {
       this.setEditorDecorations(editor, currentLineExecuteHighlightType, currentLine);
+      editor.revealRange(editor.document.lineAt(currentLine).range, vscode.TextEditorRevealType.InCenter);
+      this.focusLineInEditorCentered(currentLine, editor);
+    } else {
+      this.focusLineInEditorCentered(this._trace[0][0], editor);
     }
+  }
+
+  private focusLineInEditorCentered(line: number, editor: vscode.TextEditor) {
+    editor.revealRange(editor.document.lineAt(line).range, vscode.TextEditorRevealType.InCenter);
   }
 
   private setNextLineHighlighting(editor: vscode.TextEditor) {

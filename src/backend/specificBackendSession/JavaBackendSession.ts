@@ -29,8 +29,8 @@ export const javaBackendSession: ILanguageBackendSession = {
             const [locals, globals] = [scopes[0], scopes[1]];
             const localsVariables = (await variablesRequest(session, locals.variablesReference)).filter(variable => variable.name !== '->loadClass()');
 
-            localsVariables.forEach(variable => {
-                const reference = Number(variable.value.split("@")[1]);
+            localsVariables.filter(variable => variable.variablesReference > 0).forEach(variable => {
+                const reference = getJavaSpecificReference(variable);
                 if (!Number.isNaN(reference)) {
                     if (!duplicateReferencesMap.has(reference)) {
                         duplicateReferencesMap.set(reference, variable.variablesReference);
@@ -73,13 +73,32 @@ export const javaBackendSession: ILanguageBackendSession = {
 };
 
 function getRef(variable: Variable, duplicateReferencesMap: Map<number, number>, stringRefKey?: number): number {
-    const reference = stringRefKey ? stringRefKey : Number(variable.value.split("@")[1]);
+    const reference = stringRefKey ? stringRefKey : getJavaSpecificReference(variable);
     if (!Number.isNaN(reference)) {
         const x = duplicateReferencesMap.get(reference);
         if (x) {
             return x;
         }
     }
+    return variable.variablesReference;
+}
+
+function getJavaSpecificReference(variable: Variable): Address {
+    const split = variable.value.split("@");
+    if (!isNaN(Number(split[1]))) {
+        return Number(split[1]);
+    }
+
+    if (split.length < 2) {
+        return variable.variablesReference;
+    }
+
+    const secondSplit = split[1].split(" ");
+
+    if (!isNaN(Number(secondSplit[0]))) {
+        return Number(secondSplit[0]);
+    }
+
     return variable.variablesReference;
 }
 
@@ -198,8 +217,9 @@ async function updateDuplicateReferencesMap(duplicateReferencesMap: Map<number, 
         variableToEvaluate = references.filter(variable => variable.name === 'value')[0];
         stringRefKey = Number(variableToEvaluate.value.split("@")[1]);
     }
-    if (!duplicateReferencesMap.has(Number(variableToEvaluate.value.split("@")[1]))) {
-        duplicateReferencesMap.set(Number(variableToEvaluate.value.split("@")[1]), variable.variablesReference);
+    const reference = getJavaSpecificReference(variableToEvaluate);
+    if (!duplicateReferencesMap.has(reference)) {
+        duplicateReferencesMap.set(reference, variable.variablesReference);
     }
     return stringRefKey;
 }
@@ -372,7 +392,7 @@ function getUpdateForHeapV(variable: Variable, actualVariable: Variable, actualH
             if (actualHeapV) {
                 const newProperties = (actualHeapV as ClassValue).properties.set(actualVariable.name, value);
                 const oldClassName = (actualHeapV as ClassValue).className;
-                return { className: oldClassName , properties: newProperties };
+                return { className: oldClassName, properties: newProperties };
             }
             return { className: className, properties: new Map<string, Value>().set(actualVariable.name, value) };
         case 'instance': // TODO check

@@ -1,73 +1,59 @@
 # ProgramFlow-Visualization
 
-This is the README for the extension "programflow-visualization"
+This extension helps to visualize programs and is meant to support beginners in programming. The extension is inspired by [Python Tutor](https://pythontutor.com/).
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+The extension is used to visualise a program and its heap and stack. Currently there is support for Java and Python. An example is shown in the image below.
 
-For example if there is an image subfolder under your extension project workspace:
+![Visualisation](doc/PolynomJSimple.png)
 
-\!\[feature X\]\(images/feature-x.png\)
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+To start the visualisation it is necessary to have the file open and it is a normal `.py` or `.java` file. Then a button `programflow-visualisation` will appear in the context menu or in the run field to start it.
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+It is necessary to have the correct extension in vsc for the specific language.
 
-``npm install fp-ts``
+For example, for Java it is recommended to have [Debugger for Java](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-debug) and also [Language Support for Java(TM) by Red Hat](https://marketplace.visualstudio.com/items?itemName=redhat.java) installed.
+
+For Python, [Python](https://marketplace.visualstudio.com/items?itemName=ms-python.python) and [Jupyter](https://marketplace.visualstudio.com/items?itemName=ms-toolsai.jupyter).
+
+## Architecture 
+
+### Simple Architecture
+
+![Simple Architecture](doc/simple_architecture.png)
+
+
+### Detailed Architecture
+
+![Detailed Architecture](doc/architecture.png)
+
+## Troubleshooting
+
+If an error occurs, it may be because the extension needs to create a file. So a fix might be to make sure you have the correct permissions on the folder.
+
+```bash
+sudo chown -R <my_username> <my_folder>
+```
 
 ## Extension Settings
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+This extension adds the following settings:
 
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: enable/disable this extension
-* `myExtension.thing`: set to `blah` to do something
+* `Output Backend Trace`: enable/disable the output of the generated trace to a json file.
 
 ## Known Issues
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+* Some visualisations, such as a HashMap in Java, are not as perfect as they should be.
+
+* With larger files it becomes very slow and inefficient.
 
 ## Release Notes
 
-Users appreciate release notes as you update your extension.
-
+The release notes are listed below
 ### 1.0.0
 
-Initial release of ...
+Initial release of ProgramFlow-Visualisation.
 
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
----
-
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-**Note:** You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+CMD+V` on macOS or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets
-
-### For more information
-
-* [Visual Studio Code&#39;s Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+* Support for Python and Java

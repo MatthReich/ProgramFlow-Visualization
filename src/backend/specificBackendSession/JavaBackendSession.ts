@@ -16,38 +16,28 @@ export const javaBackendSession: ILanguageBackendSession = {
         let heap = new Map<Address, HeapValue>();
         let debuggerStep: DebuggerStep = 'stepIn';
 
-        if (stackFrames.filter(frame => frame.name.includes('.main(')).length <= 0) {
+        if (!mainClassExists(stackFrames)) {
             return [stack, heap, 'continue'];
         }
 
-        if (stackFrames.filter(frame => frame.source === undefined).length > 0) {
+        if (!definedFileSourceExists(stackFrames)) {
             return [stack, heap, 'stepOut'];
         }
 
         for (const stackFrame of stackFrames) {
             const scopes = await scopesRequest(session, stackFrame.id);
-            const [locals, globals] = [scopes[0], scopes[1]];
+            const [locals, _] = [scopes[0], scopes[1]];
             const localsVariables = (await variablesRequest(session, locals.variablesReference)).filter(variable => variable.name !== '->loadClass()');
 
-            localsVariables.filter(variable => variable.variablesReference > 0).forEach(variable => {
-                const reference = getJavaSpecificReference(variable);
-                if (!Number.isNaN(reference)) {
-                    if (!duplicateReferencesMap.has(reference)) {
-                        duplicateReferencesMap.set(reference, variable.variablesReference);
-                    }
-                }
-            });
+            appendDuplicateReferencesMap(localsVariables, duplicateReferencesMap);
+            updateVariableReference(localsVariables, duplicateReferencesMap);
 
-            localsVariables.forEach(variable => variable['variablesReference'] = getRef(variable, duplicateReferencesMap
-            ));
-
-            const primitiveVariables = localsVariables.filter((variable) =>
-                variable.variablesReference === 0
+            const primitiveVariables = localsVariables.filter(variable =>
+                !hasVariableReference(variable)
             );
 
-            const heapVariables = localsVariables.filter(
-                (variable) =>
-                    variable.variablesReference > 0
+            const heapVariables = localsVariables.filter(variable =>
+                hasVariableReference(variable)
             );
 
             const allVariables = [...primitiveVariables, ...heapVariables];
@@ -64,23 +54,46 @@ export const javaBackendSession: ILanguageBackendSession = {
                 }
             });
 
-            localsVariables.forEach(variable => variable['variablesReference'] = getRef(variable, duplicateReferencesMap
-            ));
+            updateVariableReference(localsVariables, duplicateReferencesMap);
+
             stack.push(createStackElemFrom(stackFrame, allVariables));
         }
         return [stack, heap, debuggerStep];
     }
 };
 
-function getRef(variable: Variable, duplicateReferencesMap: Map<number, number>, stringRefKey?: number): number {
-    const reference = stringRefKey ? stringRefKey : getJavaSpecificReference(variable);
-    if (!Number.isNaN(reference)) {
-        const x = duplicateReferencesMap.get(reference);
-        if (x) {
-            return x;
+function mainClassExists(stackFrames: Array<StackFrame>): boolean {
+    return stackFrames.filter(frame => frame.name.includes('.main(')).length > 0;
+}
+
+function definedFileSourceExists(stackFrames: Array<StackFrame>): boolean {
+    return stackFrames.filter(frame => frame.source === undefined).length <= 0;
+}
+
+function hasVariableReference(variable: Variable): boolean {
+    return variable.variablesReference > 0;
+}
+
+function appendDuplicateReferencesMap(variables: Variable[], duplicateReferencesMap: Map<number, number>) {
+    variables.filter(variable => hasVariableReference(variable)).forEach(variable => {
+        const reference = getJavaSpecificReference(variable);
+        if (!duplicateReferencesMap.has(reference)) {
+            duplicateReferencesMap.set(reference, variable.variablesReference);
         }
-    }
-    return variable.variablesReference;
+    });
+}
+
+function getRef(variable: Variable, duplicateReferencesMap: Map<number, number>, stringRefKey?: number): number {
+    const reference: number = stringRefKey ?? getJavaSpecificReference(variable);
+    const realReference = duplicateReferencesMap.get(reference);
+
+    return realReference ?? variable.variablesReference;
+}
+
+function updateVariableReference(variables: Array<Variable>, duplicateReferencesMap: Map<number, number>) {
+    variables.forEach(variable =>
+        variable['variablesReference'] = getRef(variable, duplicateReferencesMap
+    ));
 }
 
 function getJavaSpecificReference(variable: Variable): Address {
@@ -259,13 +272,7 @@ async function createInnerHeapVariable(variable: Variable, duplicateReferencesMa
     const stringRefKey = await updateDuplicateReferencesMap(duplicateReferencesMap, variable, session);
     variable['variablesReference'] = getRef(variable, duplicateReferencesMap, stringRefKey);
 
-    let listForDepth: Variable[];
-    if (referenceMap.has(variable.variablesReference)) {
-        listForDepth = referenceMap.get(variable.variablesReference)!;
-    } else {
-        listForDepth = await variablesRequest(session, variable.variablesReference);
-        referenceMap.set(variable.variablesReference, listForDepth);
-    }
+    let listForDepth: Variable[] = await getVariables(variable, referenceMap, session);
 
     while (listForDepth.length > 0) {
         const [actualVariable, ...remainingVariables] = listForDepth;
@@ -311,6 +318,16 @@ async function createInnerHeapVariable(variable: Variable, duplicateReferencesMa
         name: variable.type,
         value: heapValue
     } as RawHeapValue);
+}
+
+async function getVariables(variable: Variable, referenceMap: Map<number, Variable[]>, session: DebugSession): Promise<Variable[]> {
+    if (referenceMap.has(variable.variablesReference)) {
+        return referenceMap.get(variable.variablesReference)!;
+    } 
+
+    const listForDepth = await variablesRequest(session, variable.variablesReference);
+    referenceMap.set(variable.variablesReference, listForDepth);
+    return listForDepth;
 }
 
 async function createHashMapHeapValues(variable: Variable, session: DebugSession): Promise<[HeapValue, Array<RawHeapValue>]> { // TODO refactor
@@ -400,7 +417,7 @@ function getUpdateForHeapV(variable: Variable, actualVariable: Variable, actualH
                 ? (actualHeapV as Map<string, Value>).set(actualVariable.name, value)
                 : new Map<string, Value>().set(actualVariable.name, value);
         default:
-            if (variable.type.includes("[]")) { // int[], float[], int[][]
+            if (isArrayType(variable)) {
                 return actualHeapV
                     ? (actualHeapV as Array<Value>).concat(value)
                     : Array.of(value);
@@ -408,4 +425,8 @@ function getUpdateForHeapV(variable: Variable, actualVariable: Variable, actualH
 
             return Array.of(value);
     }
+}
+
+function isArrayType(variable: Variable): boolean {
+    return variable.type.includes("[]");
 }
